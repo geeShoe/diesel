@@ -14,22 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 declare(strict_types=1);
 
-namespace Geeshoe\Diesel\Database;
+namespace Geeshoe\Diesel;
 
 use Geeshoe\Diesel\Model\SQL;
 use Geeshoe\Diesel\Model\SQLCollection;
 use Geeshoe\Helpers\Files\FileHelpers;
 
 /**
- * Class MariaDB
+ * Class SQLFiles
  *
- * @package Geeshoe\Diesel\Database
+ * @package Geeshoe\Diesel
  * @author  Jesse Rushlow <jr@geeshoe.com>
  * @link    https://geeshoe.com
  */
-class MariaDB
+class SQLFiles
 {
     /**
      * @param string $dir

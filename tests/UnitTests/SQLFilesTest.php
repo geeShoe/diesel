@@ -19,19 +19,12 @@ declare(strict_types=1);
 
 namespace Geeshoe\Diesel\UnitTests;
 
-use Geeshoe\Diesel\Database\MariaDB;
+use Geeshoe\Diesel\SQLFiles;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Class MariaDBTest
- *
- * @package Geeshoe\Diesel
- * @author  Jesse Rushlow <jr@geeshoe.com>
- * @link    https://geeshoe.com
- */
-class MariaDBTest extends TestCase
+class SQLFilesTest extends TestCase
 {
     /**
      * @var vfsStreamDirectory
@@ -66,11 +59,11 @@ class MariaDBTest extends TestCase
     }
 
     /**
-     * @return MariaDB|object
+     * @return SQLFiles|object
      */
     public function getExtendedClass()
     {
-        return new class extends MariaDB
+        return new class extends SQLFiles
         {
             public function fileContents(string $file): string
             {
@@ -158,7 +151,7 @@ class MariaDBTest extends TestCase
         $this->createFile();
         $this->createFile();
 
-        $mdb = new MariaDB();
+        $mdb = new SQLFiles();
         $collection = $mdb->getSQLFilesFromDir($this->path);
 
         $this->assertCount(2, $collection);
