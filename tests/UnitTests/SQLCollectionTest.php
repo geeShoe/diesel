@@ -136,4 +136,37 @@ class SQLCollectionTest extends TestCase
 
         $this->assertNull($result);
     }
+
+    /**
+     * @throws \Exception
+     */
+    public function testReplaceReplacesObjectInCollection(): void
+    {
+        $object = $this->makeSQLObject();
+
+        $collection = new SQLCollection();
+        $collection->collection = [$object];
+
+        $object->contents = 'Ipsum Lorem';
+
+        $collection->replace($object->name, $object);
+
+        $this->assertCount(1, $collection);
+        $this->assertSame($object, $collection->getObjectByName($object->name));
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testRemoveDropObjectFromCollection(): void
+    {
+        $object = $this->makeSQLObject();
+
+        $collection = new SQLCollection();
+        $collection->collection = [$object];
+
+        $collection->remove($object->name);
+
+        $this->assertCount(0, $collection);
+    }
 }

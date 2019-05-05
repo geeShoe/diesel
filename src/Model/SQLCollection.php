@@ -41,6 +41,35 @@ class SQLCollection implements \Countable
     }
 
     /**
+     * Replace a SQL object within the collection
+     *
+     * @param string $name
+     * @param SQL    $replacement
+     */
+    public function replace(string $name, SQL $replacement): void
+    {
+        foreach ($this->collection as $key => $object) {
+            if ($object->name === $name) {
+                $this->collection[$key] = $replacement;
+            }
+        }
+    }
+
+    /**
+     * Remove an SQL object from the collection
+     *
+     * @param string $name
+     */
+    public function remove(string $name): void
+    {
+        foreach ($this->collection as $key => $object) {
+            if ($object->name === $name) {
+                unset($this->collection[$key]);
+            }
+        }
+    }
+
+    /**
      * @return array
      */
     public function getCollection(): array
