@@ -40,7 +40,7 @@ class SQLCollectionTest extends TestCase
     public function makeSQLObject(): SQL
     {
         $sql = new SQL();
-        $sql->name = random_int(1, 10) . 'file.sql';
+        $sql->name = random_int(1, 1000) . 'file.sql';
         $sql->path = '/some/path';
         $sql->contents = 'Lorem Ipsum';
 
