@@ -21,7 +21,6 @@ namespace Geeshoe\Diesel;
 
 use Geeshoe\Diesel\Model\SQL;
 use Geeshoe\Diesel\Model\SQLCollection;
-use Geeshoe\Helpers\Files\FileHelpers;
 
 /**
  * Class SQLFiles
@@ -33,22 +32,28 @@ use Geeshoe\Helpers\Files\FileHelpers;
 class SQLFiles
 {
     /**
+     * @var string Path to SQL Files
+     */
+    public static $dir;
+
+    /**
      * @param string $dir
      *
      * @return SQLCollection
      */
-    public function getSQLFilesFromDir(string $dir): SQLCollection
+    public static function getSQLCollection(string $dir): SQLCollection
     {
-        $files = $this->getFileList($dir);
-        $files = $this->dropUnreadableFiles($dir, $files);
-
+        self::$dir = $dir;
         $collection = new SQLCollection();
 
-        foreach ($files as $file) {
+        $sqlFiles = self::sortFiles();
+
+        foreach ($sqlFiles as $file) {
             $sql = new SQL();
             $sql->name = $file;
-            $sql->path = $dir;
-            $sql->contents = $this->getFileContents("$dir/$file");
+            $sql->path = self::$dir;
+            $sql->content = file_get_contents(self::$dir."/$file");
+
             $collection->add($sql);
         }
 
@@ -56,35 +61,14 @@ class SQLFiles
     }
 
     /**
-     * @param string $dir
-     *
      * @return array
      */
-    protected function getFileList(string $dir): array
+    protected static function sortFiles(): array
     {
-        $contents = scandir($dir);
+        $files = self::gatherFiles();
 
-        $files = [];
-
-        foreach ($contents as $file) {
-            if (preg_match('/\.sql$/i', $file)) {
-                $files[] = $file;
-            }
-        }
-
-        return $files;
-    }
-
-    /**
-     * @param string $dir
-     * @param array  $files
-     *
-     * @return array
-     */
-    protected function dropUnreadableFiles(string $dir, array $files = []): array
-    {
         foreach ($files as $key => $file) {
-            if (!FileHelpers::checkFileIsR("$dir/$file")) {
+            if (!preg_match('/\.sql$/i', $file)) {
                 unset($files[$key]);
             }
         }
@@ -93,12 +77,16 @@ class SQLFiles
     }
 
     /**
-     * @param string $file
-     *
-     * @return string
+     * @return array
      */
-    protected function getFileContents(string $file): string
+    protected static function gatherFiles(): array
     {
-        return file_get_contents($file);
+        $files = scandir(self::$dir);
+
+        if ($files !== false) {
+            return $files;
+        }
+
+        return [];
     }
 }

@@ -21,139 +21,30 @@ namespace Geeshoe\Diesel\UnitTests;
 
 use Geeshoe\Diesel\SQLFiles;
 use org\bovigo\vfs\vfsStream;
-use org\bovigo\vfs\vfsStreamDirectory;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Class SQLFilesTest
+ *
+ * @package Geeshoe\Diesel\UnitTests
+ * @author  Jesse Rushlow <jr@geeshoe.com>
+ * @link    https://geeshoe.com
+ */
 class SQLFilesTest extends TestCase
 {
-    /**
-     * @var vfsStreamDirectory
-     */
-    public $vfs;
-
-    /**
-     * @var string
-     */
-    public $path = 'vfs://root';
-
-    /**
-     * @inheritDoc
-     */
-    public function setUp(): void
+    public function testGetSQLCollectionReturnsACollection(): void
     {
-        $this->vfs = vfsStream::setup();
-    }
+        $vfs = vfsStream::setup();
 
-    /**
-     * @return string
-     *
-     * @throws \Exception
-     */
-    public function createFile(): string
-    {
-        $fileName = random_int(1, 1000) . 'someFile.sql';
+        vfsStream::newFile('foo.sql')->at($vfs);
+        vfsStream::newFile('bar');
 
-        vfsStream::newFile($fileName)->at($this->vfs);
+        $path = 'vfs://root';
 
-        return $fileName;
-    }
+        file_put_contents("$path/foo.sql", 'SQL Content');
 
-    /**
-     * @return SQLFiles|object
-     */
-    public function getExtendedClass()
-    {
-        return new class extends SQLFiles
-        {
-            public function fileContents(string $file): string
-            {
-                return $this->getFileContents($file);
-            }
+        $collection = SQLFiles::getSQLCollection($path);
 
-            public function unreadableFiles(string $dir, array $files = []): array
-            {
-                return $this->dropUnreadableFiles($dir, $files);
-            }
-
-            public function fileList(string $dir): array
-            {
-                return $this->getFileList($dir);
-            }
-        };
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function testGetFileContentsReturnsContentsOfFile(): void
-    {
-        $class = $this->getExtendedClass();
-
-        $file = $this->createFile();
-
-        $content = 'Lorem Ipsum';
-
-        file_put_contents("$this->path/$file", $content);
-
-        $result = $class->fileContents("$this->path/$file");
-
-        $this->assertSame($content, $result);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function testDropUnreadableFilesReturnsOnlyFilesThatAreReadable(): void
-    {
-        $class = $this->getExtendedClass();
-
-        $unreadable = $this->createFile();
-        chmod("vfs://root/$unreadable", 0000);
-
-        $fileList = [
-            $this->createFile(),
-            $unreadable
-        ];
-
-        $results = $class->unreadableFiles($this->path, $fileList);
-
-        $this->assertSame([0 => $fileList[0]], $results);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function testGetFileListOnlyReturnsDotSQLFiles(): void
-    {
-        $expected = [
-            $this->createFile(),
-            $this->createFile()
-        ];
-
-        vfsStream::newFile('some.txt')->at($this->vfs);
-
-        $class = $this->getExtendedClass();
-
-        $results = $class->fileList($this->path);
-
-        $this->assertCount(2, $results);
-
-        foreach ($expected as $file) {
-            $this->assertNotFalse(array_search($file, $results, true));
-        }
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function testGetSQLFilesFromDirReturnsSQLCollection(): void
-    {
-        $this->createFile();
-        $this->createFile();
-
-        $mdb = new SQLFiles();
-        $collection = $mdb->getSQLFilesFromDir($this->path);
-
-        $this->assertCount(2, $collection);
+        $this->assertCount(1, $collection);
     }
 }
