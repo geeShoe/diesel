@@ -62,9 +62,9 @@ class MariaDB
     }
 
     /**
-     * @param string $name      Schema name
-     * @param string $charSet   Character Set
-     * @param string $collate   Collation
+     * @param string $name    Schema name
+     * @param string $charSet Character Set
+     * @param string $collate Collation
      */
     public function createSchema(
         string $name,
@@ -76,6 +76,18 @@ class MariaDB
         CHARACTER SET = '$charSet'
         COLLATE = '$collate';
         EOT;
+
+        $this->pdo->exec($sql);
+    }
+
+    /**
+     * @param string $name
+     * @param string $host
+     * @param string $password
+     */
+    public function createUser(string $name, string $host, string $password): void
+    {
+        $sql = "CREATE USER '$name'@'$host' IDENTIFIED BY '$password';";
 
         $this->pdo->exec($sql);
     }

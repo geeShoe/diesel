@@ -92,4 +92,17 @@ class MariaDBTest extends TestCase
         $maria = new MariaDB($pdo);
         $maria->createSchema('test');
     }
+
+    /**
+     * @throws \ReflectionException
+     */
+    public function testCreateUserCallsPDOExec(): void
+    {
+        $expected = "CREATE USER 'test'@'localhost' IDENTIFIED BY 'somePassword';";
+
+        $pdo = $this->pdoExec($expected);
+
+        $maria = new MariaDB($pdo);
+        $maria->createUser('test', 'localhost', 'somePassword');
+    }
 }
