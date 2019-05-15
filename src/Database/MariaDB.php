@@ -22,13 +22,13 @@ namespace Geeshoe\Diesel\Database;
 use Geeshoe\Diesel\Model\SQL;
 
 /**
- * Class MariaDbSetup
+ * Class MariaDb
  *
  * @package Geeshoe\Diesel\Database
  * @author  Jesse Rushlow <jr@geeshoe.com>
  * @link    https://geeshoe.com
  */
-class MariaDbSetup
+class MariaDB
 {
     /**
      * @var \PDO
@@ -46,10 +46,37 @@ class MariaDbSetup
     }
 
     /**
+     * @param string $sql
+     */
+    public function execute(string $sql): void
+    {
+        $this->pdo->exec($sql);
+    }
+
+    /**
      * @param SQL $sqlObject
      */
     public function runSQLFromSQLObject(SQL $sqlObject): void
     {
-        $this->pdo->exec($sqlObject->contents);
+        $this->pdo->exec($sqlObject->content);
+    }
+
+    /**
+     * @param string $name      Schema name
+     * @param string $charSet   Character Set
+     * @param string $collate   Collation
+     */
+    public function createSchema(
+        string $name,
+        string $charSet = 'utf8mb4',
+        string $collate = 'utf8mb4_general_ci'
+    ): void {
+        $sql = <<< EOT
+        CREATE SCHEMA $name
+        CHARACTER SET = '$charSet'
+        COLLATE = '$collate';
+        EOT;
+
+        $this->pdo->exec($sql);
     }
 }
