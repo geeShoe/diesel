@@ -34,139 +34,119 @@ class SQLCollectionTest extends TestCase
 {
     /**
      * @return SQL
-     *
-     * @throws \Exception
      */
-    public function makeSQLObject(): SQL
+    public function getSQLObject(): SQL
     {
         $sql = new SQL();
-        $sql->name = random_int(1, 1000) . 'file.sql';
-        $sql->path = '/some/path';
-        $sql->contents = 'Lorem Ipsum';
-
+        $sql->name = 'someName';
+        $sql->path = '/path';
+        $sql->content = 'SQL Content';
         return $sql;
     }
 
     /**
-     * @throws \Exception
+     * @throws \PHPUnit\Framework\Exception
+     * @throws \PHPUnit\Framework\ExpectationFailedException
+     * @throws \SebastianBergmann\RecursionContext\InvalidArgumentException
      */
-    public function testAddMethodAddsSQLObjectToCollection(): void
+    public function testAddMethodAddsObjectToCollection(): void
     {
-        $sql = $this->makeSQLObject();
+        $sql = $this->getSQLObject();
 
         $collection = new SQLCollection();
         $collection->add($sql);
 
-        $expected = [0 => $sql];
-
-        $this->assertSame($expected, $collection->collection);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function testGetCollectionReturnsCollectionArray(): void
-    {
-        $sql = $this->makeSQLObject();
-
-        $collection = new SQLCollection();
-        $collection->collection = [0 => $sql];
-
-        $results = $collection->getCollection();
-
-        $this->assertSame([0 => $sql], $results);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function testCountReturnsNumberOfItemsInTheCollection(): void
-    {
-        $array = [
-            $this->makeSQLObject(),
-            $this->makeSQLObject(),
-            $this->makeSQLObject()
-        ];
-
-        $collection = new SQLCollection();
-        $collection->collection = $array;
-
-        $result = $collection->count();
-
-        $this->assertSame(3, $result);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function testGetObjectByNameReturnsSQLObject(): void
-    {
-        $expected = $this->makeSQLObject();
-
-        $array = [
-            $this->makeSQLObject(),
-            $this->makeSQLObject(),
-            $this->makeSQLObject(),
-            $expected
-        ];
-
-        $collection = new SQLCollection();
-        $collection->collection = $array;
-
-        $result = $collection->getObjectByName($expected->name);
-
-        $this->assertSame($expected, $result);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function testGetObjectByNameReturnsNullIfObjectDoesntExist(): void
-    {
-        $array = [
-            $this->makeSQLObject(),
-            $this->makeSQLObject(),
-            $this->makeSQLObject()
-        ];
-
-        $collection = new SQLCollection();
-        $collection->collection = $array;
-
-        $result = $collection->getObjectByName('MyObject');
-
-        $this->assertNull($result);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function testReplaceReplacesObjectInCollection(): void
-    {
-        $object = $this->makeSQLObject();
-
-        $collection = new SQLCollection();
-        $collection->collection = [$object];
-
-        $object->contents = 'Ipsum Lorem';
-
-        $collection->replace($object->name, $object);
-
         $this->assertCount(1, $collection);
-        $this->assertSame($object, $collection->getObjectByName($object->name));
     }
 
     /**
-     * @throws \Exception
+     * @throws \PHPUnit\Framework\Exception
+     * @throws \PHPUnit\Framework\ExpectationFailedException
+     * @throws \SebastianBergmann\RecursionContext\InvalidArgumentException
      */
-    public function testRemoveDropObjectFromCollection(): void
+    public function testRemoveMethodRemovesObjectFromTheCollection(): void
     {
-        $object = $this->makeSQLObject();
+        $sql = $this->getSQLObject();
 
         $collection = new SQLCollection();
-        $collection->collection = [$object];
+        $collection->collection[] = $sql;
 
-        $collection->remove($object->name);
+        $collection->remove('someName');
 
         $this->assertCount(0, $collection);
+    }
+
+    /**
+     * @throws \PHPUnit\Framework\Exception
+     * @throws \PHPUnit\Framework\ExpectationFailedException
+     * @throws \SebastianBergmann\RecursionContext\InvalidArgumentException
+     */
+    public function testReplaceMethodReplacesAnSQLObject(): void
+    {
+        $sql = $this->getSQLObject();
+
+        $collection = new SQLCollection();
+        $collection->collection[] = $sql;
+
+        $new = $this->getSQLObject();
+        $new->path = '/new/Path';
+
+        $collection = new SQLCollection();
+        $collection->collection[] = $sql;
+
+        $collection->replace($new);
+
+        $this->assertCount(1, $collection);
+        $this->assertSame($new->path, $collection->collection[0]->path);
+    }
+
+    /**
+     * @throws \PHPUnit\Framework\Exception
+     * @throws \PHPUnit\Framework\ExpectationFailedException
+     * @throws \SebastianBergmann\RecursionContext\InvalidArgumentException
+     */
+    public function testReplaceMethodReplacesObjectWithNameProvided(): void
+    {
+        $sql = $this->getSQLObject();
+
+        $collection = new SQLCollection();
+        $collection->collection[] = $sql;
+
+        $new = $this->getSQLObject();
+        $new->name = 'newName';
+
+        $collection->replace($new, 'someName');
+
+        $this->assertCount(1, $collection);
+        $this->assertSame($new, $collection->collection[0]);
+    }
+
+    /**
+     * @throws \PHPUnit\Framework\ExpectationFailedException
+     * @throws \SebastianBergmann\RecursionContext\InvalidArgumentException
+     */
+    public function testGetSQLByNameReturnsSQLObject(): void
+    {
+        $sql = $this->getSQLObject();
+
+        $collection = new SQLCollection();
+        $collection->collection[] = $sql;
+
+        $result = $collection->getSQLByName($sql->name);
+
+        $this->assertSame($sql, $result);
+    }
+
+    /**
+     * @throws \PHPUnit\Framework\ExpectationFailedException
+     * @throws \SebastianBergmann\RecursionContext\InvalidArgumentException
+     */
+    public function testGetSQLByNameReturnsNullIfObjectNotFound(): void
+    {
+        $collection = new SQLCollection();
+
+        $result = $collection->getSQLByName('Test');
+
+        $this->assertNull($result);
     }
 }

@@ -25,79 +25,100 @@ namespace Geeshoe\Diesel\Model;
  * @author  Jesse Rushlow <jr@geeshoe.com>
  * @link    https://geeshoe.com
  */
-class SQLCollection implements \Countable
+class SQLCollection extends AbstractCollection
 {
-    /**
-     * @var array
-     */
-    public $collection = [];
-
-    /**
-     * @param SQL $object
-     */
-    public function add(SQL $object): void
-    {
-        $this->collection[] = $object;
-    }
-
-    /**
-     * Replace a SQL object within the collection
-     *
-     * @param string $name
-     * @param SQL    $replacement
-     */
-    public function replace(string $name, SQL $replacement): void
-    {
-        foreach ($this->collection as $key => $object) {
-            if ($object->name === $name) {
-                $this->collection[$key] = $replacement;
-            }
-        }
-    }
-
-    /**
-     * Remove an SQL object from the collection
-     *
-     * @param string $name
-     */
-    public function remove(string $name): void
-    {
-        foreach ($this->collection as $key => $object) {
-            if ($object->name === $name) {
-                unset($this->collection[$key]);
-            }
-        }
-    }
-
-    /**
-     * @return array
-     */
-    public function getCollection(): array
-    {
-        return $this->collection;
-    }
-
-    /**
-     * @return int
-     */
-    public function count(): int
-    {
-        return count($this->collection);
-    }
-
     /**
      * @param string $name
      *
      * @return SQL|null
      */
-    public function getObjectByName(string $name): ?SQL
+    public function getSQLByName(string $name): ?SQL
     {
-        foreach ($this->collection as $key => $object) {
+        foreach ($this as $object) {
             if ($object->name === $name) {
-                return $this->collection[$key];
+                return $object;
             }
         }
 
         return null;
+    }
+
+    /**
+     * @param SQL $sqlObject
+     */
+    public function add(SQL $sqlObject): void
+    {
+        $this->collection[] = $sqlObject;
+    }
+
+    /**
+     * @param SQL         $sqlObject
+     * @param string|null $oldName
+     */
+    public function replace(SQL $sqlObject, string $oldName = null): void
+    {
+        $name = $sqlObject->name;
+
+        if ($oldName !== null) {
+            $name = $oldName;
+        }
+
+        $keys = array_keys($this->collection);
+
+        foreach ($keys as $key) {
+            $this->compareReplaceName($name, $key, $sqlObject);
+        }
+    }
+
+    /**
+     * @param string $oldName
+     * @param int    $key
+     * @param SQL    $object
+     */
+    protected function compareReplaceName(string $oldName, int $key, SQL $object): void
+    {
+        if ($this->collection[$key]->name === $oldName) {
+            $this->replaceObject($key, $object);
+        }
+    }
+
+    /**
+     * @param int $key
+     * @param SQL $object
+     */
+    protected function replaceObject(int $key, SQL $object): void
+    {
+        $this->collection[$key] = $object;
+    }
+
+    /**
+     * @param string $objectName
+     */
+    public function remove(string $objectName): void
+    {
+        $keys = array_keys($this->collection);
+
+        foreach ($keys as $key) {
+            $this->compareRemoveName($key, $objectName);
+        }
+    }
+
+    /**
+     * @param int    $key
+     * @param string $name
+     */
+    protected function compareRemoveName(int $key, string $name): void
+    {
+        if ($this->collection[$key]->name === $name) {
+            $this->removeObject($key);
+        }
+    }
+
+    /**
+     * @param int $key
+     */
+    protected function removeObject(int $key): void
+    {
+        unset($this->collection[$key]);
     }
 }
