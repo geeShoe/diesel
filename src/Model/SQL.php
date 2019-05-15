@@ -40,5 +40,5 @@ class SQL
     /**
      * @var string
      */
-    public $contents;
+    public $content;
 }
