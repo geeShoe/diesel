@@ -58,4 +58,23 @@ class UserGrantsTest extends TestCase
 
         $this->assertSame($expected, $result);
     }
+
+    public function testParseGrantsSQLParsesMultilineSQL(): void
+    {
+        $sql = <<< EOT
+        GRANT SOMETHING ON user_procedure TO 'user'@'host';
+        GRANT SOMETHING ELSE on user_procedure TO 'user'@'host';
+        EOT;
+
+        $expected = <<< EOT
+        GRANT SOMETHING ON user_procedure TO 'Test'@'UnitTest';
+        GRANT SOMETHING ELSE on user_procedure TO 'Test'@'UnitTest';
+        EOT;
+
+        $user = 'Test';
+        $host = 'UnitTest';
+
+        $result = UserGrants::parseGrantsSQL($user, $host, $sql);
+        $this->assertSame($expected, $result);
+    }
 }
