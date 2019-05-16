@@ -19,7 +19,7 @@ declare(strict_types=1);
 
 namespace Geeshoe\Diesel\Model;
 
-class AbstractCollection implements \Countable, \IteratorAggregate
+abstract class AbstractCollection implements \Countable, \IteratorAggregate
 {
     /**
      * @var array
